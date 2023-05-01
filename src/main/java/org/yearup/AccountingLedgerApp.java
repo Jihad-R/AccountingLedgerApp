@@ -2,10 +2,14 @@ package org.yearup;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.sql.Time;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class AccountingLedgerApp {
@@ -71,7 +75,7 @@ public class AccountingLedgerApp {
                 case "d" : {}
                 case "D":{
                     validInput = true;
-                    System.out.println("Add Deposit");
+                    addDeposit();
                     break;
                 }
                 case "p":
@@ -83,7 +87,7 @@ public class AccountingLedgerApp {
                 case "l":
                 case "L": {
                     validInput = true;
-                    ledgerScreen(); // navigate to ledger screen
+                    displayAllEntries(); // navigate to ledger screen
                     break;
                 }
                 case "X": {System.exit(1);break; }// exit the program
@@ -96,14 +100,43 @@ public class AccountingLedgerApp {
         }while(!validInput);
     }
 
-    public void ledgerScreen() {
+    public void addDeposit(){
+
+        FileWriter fileWriter = null;
+        System.out.print("Please Enter the deposit amount: ");
+        try {
+            double deposit = scanner.nextDouble();
+             fileWriter= new FileWriter("transactions.csv",true);
+
+             fileWriter.write(LocalDate.now() +"| "+ LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))+"|"+"Deposit"+"|Self"+"|"+deposit+"\n"   );
+        }
+        catch (InputMismatchException e){
+            System.out.println("Please enter a numeric value.");
+        }
+        catch (IOException ex){
+            System.out.println("File Not Found!");
+        }
+        finally {
+            try {
+                fileWriter.flush();
+                fileWriter.close();
+            }
+            catch (Exception e){
+                System.out.println("Something went wrong!");
+            }
+
+        }
+        }
+    public void displayAllEntries() {
 
         String[] headerContent = header.split("\\|");
         System.out.printf("%-11s|%-9s|%-20s|%-10s|%-7s|\n",headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
         System.out.println("------------------------------------------------------------");
+
         for (AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-            String date = String.valueOf(accountingLedger.getDate()).split("T")[0];
-            String time = (String.valueOf(Time.valueOf(accountingLedger.getDate())).split("T")[1]);
+
+            String date = String.valueOf(accountingLedger.getDate().toLocalDate());
+            String time = String.valueOf(accountingLedger.getDate().toLocalTime());
             String description = accountingLedger.getDescription();
             String vendor = accountingLedger.getVendor();
             String amount = String.valueOf(accountingLedger.getAmount());
