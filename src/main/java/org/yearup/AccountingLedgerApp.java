@@ -208,37 +208,31 @@ public class AccountingLedgerApp {
         }
 
     }
+
+    public void displayHeader(){
+
+        System.out.println("------------------------------------------------------------");
+        System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",header.split("\\|"));
+        System.out.println("------------------------------------------------------------");
+    }
+
     public void displayEntries(String entryType) {
 
-        String[] headerContent = header.split("\\|");
-        System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
-        System.out.println("------------------------------------------------------------");
+        displayHeader();
 
         for (AccountingLedger accountingLedger: accountingLedgerRecord.values()){
 
-            String date = String.valueOf(accountingLedger.getDate().toLocalDate());
-            String time = accountingLedger.getDate().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-            String description = accountingLedger.getDescription();
-            String vendor = accountingLedger.getVendor();
-            String amount = String.valueOf(accountingLedger.getAmount());
-
             // display only payments
             if (entryType.equalsIgnoreCase("p") && accountingLedger.getAmount() < 0)
-                System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                        "------------------------------------------------------------\n"
-                        ,date,time,description,vendor,amount);
+                System.out.print(accountingLedger.displayAsString());
 
             // display only deposits
             if (entryType.equalsIgnoreCase("d") && accountingLedger.getAmount() >= 0)
-                System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                        "------------------------------------------------------------\n",
-                        date,time,description,vendor,amount);
+                System.out.printf(accountingLedger.displayAsString());
 
             //display all entries
             if (entryType.equalsIgnoreCase("a"))
-                System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                        "------------------------------------------------------------\n"
-                        ,date,time,description,vendor,amount);
+                System.out.printf(accountingLedger.displayAsString());
         }
 
         homeScreen();
@@ -256,172 +250,41 @@ public class AccountingLedgerApp {
         System.out.println("5 - Search By Vendor");
         System.out.println("6 - Home screen");
         System.out.println("7 - Custom Search");
+        System.out.print("Please select command: ");
         String userInput = scanner.nextLine();
+
         switch (userInput){
 
             case "1": {
                 System.out.println("Month to Date");
-                String[] headerContent = header.split("\\|");
 
-                System.out.println("-------------------------------------------------------------------");
-                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
-                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
-                System.out.println("-------------------------------------------------------------------");
-
-                int year = LocalDateTime.now().getYear();
-
-                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-                    // stores the accounting ledger month
-                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
-
-                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
-                    String time = accountingLedger.getDate().toLocalTime()
-                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                    String description = accountingLedger.getDescription();
-                    String vendor = accountingLedger.getVendor();
-                    String amount = String.valueOf(accountingLedger.getAmount());
-
-                    if ((accountLedgerYear == year))
-                    {
-                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                                        "-------------------------------------------------------------------\n"
-                                ,date,time,description,vendor,amount);                    }
-
-                }
+                monthToDateReport();
 
                 ;break;}
             case "2": {
                 System.out.println("Previous Month");
 
-
-                int year = LocalDateTime.now().getYear(); // stores the current year
-                Month previousMonth = LocalDateTime.now().minusMonths(1).getMonth(); // stores the previous month
-
-                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-                    // stores the accounting ledger month
-                    Month accountingLedgerMonth = accountingLedger.getDate().getMonth();
-                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
-
-                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
-                    String time = accountingLedger.getDate().toLocalTime()
-                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                    String description = accountingLedger.getDescription();
-                    String vendor = accountingLedger.getVendor();
-                    String amount = String.valueOf(accountingLedger.getAmount());
-
-
-                    if ((accountingLedgerMonth.equals(previousMonth)) && (accountLedgerYear == year))
-                    {
-                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                                        "-------------------------------------------------------------------\n"
-                                ,date,time,description,vendor,amount);                    }
-
-                }
+                previousMonthReport();
 
                 break;}
             case "3": {
 
                 System.out.println("Year to Date");
-                String[] headerContent = header.split("\\|");
 
-                System.out.println("-------------------------------------------------------------------");
-                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
-                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
-                System.out.println("-------------------------------------------------------------------");
-
-                LocalDateTime currentDate = LocalDateTime.now();
-
-                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-                    // Converting the date of the accountingLedger object to a string representation
-                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
-
-                    // Formatting the time of the accountingLedger object to a string representation
-                    String time = accountingLedger.getDate().toLocalTime()
-                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-
-                    // Extracting the description of the accountingLedger object
-                    String description = accountingLedger.getDescription();
-
-                    // Extracting the vendor name of the accountingLedger object
-                    String vendor = accountingLedger.getVendor();
-
-                    // Converting the amount of the accountingLedger object to a string representation
-                    String amount = String.valueOf(accountingLedger.getAmount());
-
-
-                    if (accountingLedger.getDate().toLocalDate()
-                            .isAfter(currentDate.toLocalDate().minusYears(1)) &&
-                            accountingLedger.getDate().toLocalDate()
-                                    .isBefore(currentDate.toLocalDate().plusDays(1)))
-                    {
-                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                                        "-------------------------------------------------------------------\n"
-                                ,date,time,description,vendor,amount);                    }
-
-                }
+                yearToDateReport();
 
                 break;}
             case "4": {
                 System.out.println("Previous Year");
-                String[] headerContent = header.split("\\|");
 
-                System.out.println("-------------------------------------------------------------------");
-                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
-                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
-                System.out.println("-------------------------------------------------------------------");
+                previousYearReport();
 
-                int previousYear = LocalDateTime.now().minusYears(1).getYear();
-
-                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-                    // stores the accounting ledger month
-                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
-
-                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
-                    String time = accountingLedger.getDate().toLocalTime()
-                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                    String description = accountingLedger.getDescription();
-                    String vendor = accountingLedger.getVendor();
-                    String amount = String.valueOf(accountingLedger.getAmount());
-
-                    if (accountLedgerYear == previousYear)
-                    {
-                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                                        "-------------------------------------------------------------------\n"
-                                ,date,time,description,vendor,amount);                    }
-
-                }
                 break;}
             case "5": {
                 System.out.println("Search By Vendor");
-                System.out.print("Enter the vendor's name: ");
-                String vendorName = scanner.nextLine();
 
-                String[] headerContent = header.split("\\|");
+                searchByVendorReport();
 
-                System.out.println("-------------------------------------------------------------------");
-                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
-                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
-                System.out.println("-------------------------------------------------------------------");
-
-                for (AccountingLedger accountingLedger: accountingLedgerRecord.values())
-                {
-
-                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
-                    String time = accountingLedger.getDate().toLocalTime()
-                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                    String description = accountingLedger.getDescription();
-                    String vendor = accountingLedger.getVendor();
-                    String amount = String.valueOf(accountingLedger.getAmount());
-
-                    if (accountingLedger.getVendor().equalsIgnoreCase(vendorName))
-                    {
-                        System.out.printf(accountingLedger.displayAsString());
-                    }
-                    }
                 break;}
             case "6": {
                 homeScreen();
@@ -432,6 +295,106 @@ public class AccountingLedgerApp {
             }
             default:{
                 System.out.println("Invalid Command! Please try again.");reportScreen();break;}
+        }
+
+        reportScreen();
+    }
+
+    private void searchByVendorReport() {
+
+        System.out.print("Enter the vendor's name: ");
+        String vendorName = scanner.nextLine();
+
+        displayHeader();
+
+        for (AccountingLedger accountingLedger: accountingLedgerRecord.values())
+        {
+
+            if (accountingLedger.getVendor().equalsIgnoreCase(vendorName))
+            {
+                System.out.printf(accountingLedger.displayAsString());
+            }
+        }
+
+    }
+
+    private void previousYearReport() {
+
+
+        int previousYear = LocalDateTime.now().minusYears(1).getYear();
+
+        displayHeader();
+
+        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+            // stores the accounting ledger month
+            int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+
+            if (accountLedgerYear == previousYear)
+            {
+                System.out.printf(accountingLedger.displayAsString());
+            }
+
+        }
+    }
+
+    private void yearToDateReport() {
+
+        LocalDateTime currentDate = LocalDateTime.now();
+
+        displayHeader();
+
+        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+            if (accountingLedger.getDate().toLocalDate()
+                    .isAfter(currentDate.toLocalDate().minusYears(1)) &&
+                    accountingLedger.getDate().toLocalDate()
+                            .isBefore(currentDate.toLocalDate().plusDays(1)))
+            {
+                System.out.print(accountingLedger.displayAsString());
+            }
+
+        }
+
+    }
+
+    private void previousMonthReport() {
+        
+        int year = LocalDateTime.now().getYear(); // stores the current year
+        Month previousMonth = LocalDateTime.now().minusMonths(1).getMonth(); // stores the previous month
+
+        displayHeader();
+
+        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+            // stores the accounting ledger month
+            Month accountingLedgerMonth = accountingLedger.getDate().getMonth();
+            int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+
+            if ((accountingLedgerMonth.equals(previousMonth)) && (accountLedgerYear == year))
+            {
+                System.out.print(accountingLedger.displayAsString());
+            }
+
+        }
+    }
+
+    private void monthToDateReport() {
+
+        displayHeader();
+
+        int year = LocalDateTime.now().getYear();
+
+        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+            // stores the accounting ledger month
+            int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+
+            if ((accountLedgerYear == year))
+            {
+                System.out.print(accountingLedger.displayAsString());
+            }
+
         }
     }
 
