@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -103,125 +101,77 @@ public class AccountingLedgerApp {
         }while(!validInput);
     }
 
-    public void addDeposit(){
-
-        System.out.print("Please Enter the deposit amount: ");
+    private void writeTransaction(String type, double amount) {
         try {
-            double deposit = scanner.nextDouble();
             id++;
-            scanner.nextLine();
+            fileWriter= new FileWriter("transactions.csv",true);
 
-             fileWriter= new FileWriter("transactions.csv",true);
-
-            System.out.print("Please enter the description: ");
-            String description = scanner.nextLine().trim(); // store the description entered by the user
+            System.out.print("Enter the description: ");
+            String description = scanner.nextLine();
 
             if(description.equalsIgnoreCase("")){
                 System.out.println("Description cannot be empty."); // warning message
-                addDeposit();
+                writeTransaction(type,amount);
             }
 
-            System.out.print("Please enter the vendor: ");
+            System.out.print("Enter the vendor: ");
             String vendor = scanner.nextLine().trim(); // store the vendor name entered by the user
 
             if (vendor.equalsIgnoreCase("")){
                 System.out.println("Vendor name cannot be blank."); // warning message
-                makePayment();
+                writeTransaction(type,amount);
             }
 
-             fileWriter.write(LocalDate.now() +"| "
-                     + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                     +"|"+description+"|Joe"+"|"+deposit+"\n"); // write to file
-
-
-            accountingLedgerRecord.put(id, new AccountingLedger(id,LocalDateTime.now(),description,vendor,deposit));
-
-            System.out.println("Deposit made"); // success message
-
-        }
-        catch (InputMismatchException e){
-            System.out.println("Please enter a numeric value."); // error message
-            addDeposit(); // recursive call
-        }
-        catch (IOException ex){
-            System.out.println("File Not Found!"); //error message
-            addDeposit(); // recursive call
-        }
-        finally {
-            try {
-                fileWriter.flush();
-                fileWriter.close();
-
-                homeScreen(); // navigate to home screen
-            }
-            catch (Exception e){
-                System.out.println("Something went wrong!"); // error message
-                addDeposit();// recursive call
-            }
-        }
-        }
-
-    public void makePayment(){
-
-        System.out.print("Please enter the payment amount: ");
-        try {
-            double deposit = scanner.nextDouble();
-            scanner.nextLine();
-            id++;
-            deposit = -deposit; // negate the value of deposit
-
-            fileWriter= new FileWriter("transactions.csv",true);
-
-            System.out.print("Please enter the description: ");
-            String description = scanner.nextLine().trim(); // store the description entered by the user
-
-            if(description.equalsIgnoreCase("")){
-                System.out.println("Description cannot be blank."); // warning message
-                makePayment();
-            }
-
-            System.out.print("Please enter the vendor: ");
-            String vendor = scanner.nextLine().trim(); // store the vendor name entered by the user
-
-            if (vendor.equalsIgnoreCase("")){
-                System.out.println("Vendor name cannot be blank."); // warning message
-                makePayment();
+            if (type.equals("payment")) {
+                amount = -amount; // negate the value of payment amount
             }
 
             fileWriter.write(LocalDate.now() +"| "
                     + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                    +"|"+description+"|"+vendor+"|"+deposit+"\n"); // write to file
+                    +"|"+description+"|"+vendor+"|"+amount+"\n"); // write to file
 
-            accountingLedgerRecord.put(id, new AccountingLedger(id,LocalDateTime.now(),description,vendor,deposit));
+            accountingLedgerRecord.put(id, new AccountingLedger(id,LocalDateTime.now(),description,vendor,amount));
 
-            System.out.println("Payment made"); // success message
-        }
+            if (type.equals("deposit")) {
+                System.out.println("Deposit made"); // success message
+            } else {
+                System.out.println("Payment made"); // success message
+            }
 
-        catch (InputMismatchException e){
+        } catch (InputMismatchException e){
             System.out.println("Please enter a numeric value."); // error message
-            makePayment(); // recursive call
-        }
-
-        catch (IOException ex){
+            homeScreen();
+        } catch (IOException ex)
+        {
             System.out.println("File Not Found!"); //error message
-            makePayment(); // recursive call
+            homeScreen(); //navigate to home screen
         }
-
-        finally {
+        finally
+        {
             try {
                 fileWriter.flush();
                 fileWriter.close();
 
                 homeScreen(); // navigate to home screen
-            }
-
-            catch (Exception e){
+            } catch (Exception e){
                 System.out.println("Something went wrong!"); // error message
-                makePayment();// recursive call
+                homeScreen(); // navigate to home screen
             }
         }
+    }
 
+    public void addDeposit(){
+            System.out.print("Please Enter the deposit amount: ");
+            double deposit = scanner.nextDouble();
+            scanner.nextLine();
+            writeTransaction("deposit", deposit);
+    }
 
+    public void makePayment(){
+        System.out.print("Please enter the payment amount: ");
+        double payment = scanner.nextDouble();
+        scanner.nextLine();
+        writeTransaction("payment", payment);
         }
 
     public void ledgerScreen(){
@@ -385,9 +335,6 @@ public class AccountingLedgerApp {
 
                 for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
 
-                    // stores the accounting ledger month
-                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
-
                     // Converting the date of the accountingLedger object to a string representation
                     String date = String.valueOf(accountingLedger.getDate().toLocalDate());
 
@@ -485,12 +432,13 @@ public class AccountingLedgerApp {
                 customSearch();
                 break;
             }
+            default:{
+                System.out.println("Invalid Command! Please try again.");reportScreen();break;}
         }
     }
 
     private void customSearch() {
 
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Custom Search");
 
         // Prompt user for search values and trim whitespace
@@ -551,8 +499,6 @@ public class AccountingLedgerApp {
             // Print accountingLedger object if it passed all filters
             System.out.println(accountingLedger.toString());
         }
-
-
 
     }
 
