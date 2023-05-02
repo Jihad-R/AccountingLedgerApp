@@ -16,6 +16,8 @@ public class AccountingLedgerApp {
 
     private HashMap<Integer,AccountingLedger> accountingLedgerRecord = new HashMap<>();
     private Scanner scanner;
+    private FileWriter fileWriter = null;
+
     private boolean validInput = false;
     private String header;
 
@@ -102,29 +104,47 @@ public class AccountingLedgerApp {
 
     public void addDeposit(){
 
-        FileWriter fileWriter = null;
         System.out.print("Please Enter the deposit amount: ");
         try {
             double deposit = scanner.nextDouble();
+            scanner.nextLine();
+
              fileWriter= new FileWriter("transactions.csv",true);
 
-             fileWriter.write(LocalDate.now() +"| "+ LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))+"|"+"Deposit"+"|Self"+"|"+deposit+"\n"   );
+            System.out.print("Please enter the description: ");
+            String description = scanner.nextLine().trim(); // store the description entered by the user
+
+            if(description.equalsIgnoreCase("")){
+                System.out.println("Description cannot be empty."); // warning message
+                addDeposit();
+            }
+
+             fileWriter.write(LocalDate.now() +"| "
+                     + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                     +"|"+description+"|Joe"+"|"+deposit+"\n"); // write to file
+
+            System.out.println("Deposit made"); // success message
+
         }
         catch (InputMismatchException e){
-            System.out.println("Please enter a numeric value.");
+            System.out.println("Please enter a numeric value."); // error message
+            addDeposit(); // recursive call
         }
         catch (IOException ex){
-            System.out.println("File Not Found!");
+            System.out.println("File Not Found!"); //error message
+            addDeposit(); // recursive call
         }
         finally {
             try {
                 fileWriter.flush();
                 fileWriter.close();
+
+                homeScreen(); // navigate to home screen
             }
             catch (Exception e){
-                System.out.println("Something went wrong!");
+                System.out.println("Something went wrong!"); // error message
+                addDeposit();// recursive call
             }
-
         }
         }
     public void displayAllEntries() {
