@@ -76,13 +76,13 @@ public class AccountingLedgerApp {
                 case "d" : {}
                 case "D":{
                     validInput = true;
-                    addDeposit();
+                    makeTransaction("deposit");
                     break;
                 }
                 case "p":
                 case "P":{
                     validInput = true;
-                    makePayment();
+                    makeTransaction("payment");
                     break;
                 }
                 case "l":
@@ -160,19 +160,19 @@ public class AccountingLedgerApp {
         }
     }
 
-    public void addDeposit(){
-            System.out.print("Please Enter the deposit amount: ");
-            double deposit = scanner.nextDouble();
-            scanner.nextLine();
-            writeTransaction("deposit", deposit);
-    }
+    public void makeTransaction(String transactionType){
+            System.out.printf("Please Enter the %s amount: ",transactionType);
+            try {
+                double amount = scanner.nextDouble();
 
-    public void makePayment(){
-        System.out.print("Please enter the payment amount: ");
-        double payment = scanner.nextDouble();
-        scanner.nextLine();
-        writeTransaction("payment", payment);
-        }
+                scanner.nextLine();
+                writeTransaction(transactionType, amount);
+            }
+            catch (InputMismatchException e){
+                System.out.println("Please enter a numeric value");
+                makeTransaction(transactionType);
+            }
+    }
 
     public void ledgerScreen(){
         System.out.println("========================");
@@ -482,12 +482,12 @@ public class AccountingLedgerApp {
             }
 
             // Filter by description
-            if (!description.isEmpty() && !accountingLedger.getDescription().contains(description)) {
+            if (!description.isEmpty() && !accountingLedger.getDescription().equalsIgnoreCase(description)) {
                 continue; // Skip to next iteration
             }
 
             // Filter by vendor
-            if (!vendor.isEmpty() && !accountingLedger.getVendor().contains(vendor)) {
+            if (!vendor.isEmpty() && !accountingLedger.getVendor().equalsIgnoreCase(vendor)) {
                 continue; // Skip to next iteration
             }
 
