@@ -83,7 +83,7 @@ public class AccountingLedgerApp {
                 case "p":
                 case "P":{
                     validInput = true;
-                    System.out.println("Make Payment");
+                    makePayment();
                     break;
                 }
                 case "l":
@@ -147,6 +147,67 @@ public class AccountingLedgerApp {
             }
         }
         }
+
+    public void makePayment(){
+
+        System.out.print("Please enter the payment amount: ");
+        try {
+            double deposit = scanner.nextDouble();
+            scanner.nextLine();
+            deposit = -deposit;
+
+            fileWriter= new FileWriter("transactions.csv",true);
+
+            System.out.print("Please enter the description: ");
+            String description = scanner.nextLine().trim(); // store the description entered by the user
+
+            if(description.equalsIgnoreCase("")){
+                System.out.println("Description cannot be blank."); // warning message
+                makePayment();
+            }
+
+            System.out.print("Please enter the vendor: ");
+            String vendor = scanner.nextLine().trim(); // store the vendor name entered by the user
+
+            if (vendor.equalsIgnoreCase("")){
+                System.out.println("Vendor name cannot be blank."); // warning message
+                makePayment();
+            }
+
+            fileWriter.write(LocalDate.now() +"| "
+                    + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                    +"|"+description+"|"+vendor+"|"+deposit+"\n"); // write to file
+
+            System.out.println("Payment made"); // success message
+        }
+
+        catch (InputMismatchException e){
+            System.out.println("Please enter a numeric value."); // error message
+            makePayment(); // recursive call
+        }
+
+        catch (IOException ex){
+            System.out.println("File Not Found!"); //error message
+            makePayment(); // recursive call
+        }
+
+        finally {
+            try {
+                fileWriter.flush();
+                fileWriter.close();
+
+                homeScreen(); // navigate to home screen
+            }
+            
+            catch (Exception e){
+                System.out.println("Something went wrong!"); // error message
+                makePayment();// recursive call
+            }
+        }
+
+
+        }
+
     public void displayAllEntries() {
 
         String[] headerContent = header.split("\\|");
