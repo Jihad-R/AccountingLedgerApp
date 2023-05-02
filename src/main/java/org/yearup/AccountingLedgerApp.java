@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -252,6 +253,9 @@ public class AccountingLedgerApp {
         {
             homeScreen();
         }
+        else {
+            System.out.println("Unrecognized command! Please try again.");
+        }
 
     }
     public void displayEntries(String entryType) {
@@ -301,6 +305,7 @@ public class AccountingLedgerApp {
         System.out.println("4 - Previous Year");
         System.out.println("5 - Search By Vendor");
         System.out.println("6 - Home screen");
+        System.out.println("7 - Custom Search");
         String userInput = scanner.nextLine();
         switch (userInput){
 
@@ -476,7 +481,79 @@ public class AccountingLedgerApp {
             case "6": {
                 homeScreen();
                 break;}
+            case "7":{
+                customSearch();
+                break;
+            }
         }
+    }
+
+    private void customSearch() {
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Custom Search");
+
+        // Prompt user for search values and trim whitespace
+        System.out.print("Start Date (leave blank to skip): ");
+        String start = scanner.nextLine().trim();
+
+        System.out.print("End Date (leave blank to skip): ");
+        String end = scanner.nextLine().trim();
+
+        System.out.print("Description (leave blank to skip): ");
+        String description = scanner.nextLine().trim();
+
+        System.out.print("Vendor (leave blank to skip): ");
+        String vendor = scanner.nextLine().trim();
+
+        System.out.print("Amount (leave blank to skip): ");
+        String amount = scanner.nextLine().trim();
+
+        // Convert string start and end date values to LocalDate objects if not empty
+        LocalDate startDate = null;
+        LocalDate endDate = null;
+
+        if (!start.isEmpty()) {
+            startDate = LocalDate.parse(start);
+        }
+        if (!end.isEmpty()) {
+            endDate = LocalDate.parse(end);
+        }
+
+        // Loop through accountingLedgerRecord and filter results based on search values
+        for (AccountingLedger accountingLedger : accountingLedgerRecord.values()) {
+
+            // Filter by start date
+            if (startDate != null && !startDate.isBefore(accountingLedger.getDate().toLocalDate())) {
+                continue; // Skip to next iteration
+            }
+
+            // Filter by end date
+            if (endDate != null && !endDate.isAfter(accountingLedger.getDate().toLocalDate())) {
+                continue; // Skip to next iteration
+            }
+
+            // Filter by description
+            if (!description.isEmpty() && !accountingLedger.getDescription().contains(description)) {
+                continue; // Skip to next iteration
+            }
+
+            // Filter by vendor
+            if (!vendor.isEmpty() && !accountingLedger.getVendor().contains(vendor)) {
+                continue; // Skip to next iteration
+            }
+
+            // Filter by amount
+            if (!amount.isEmpty() && Double.parseDouble(amount) != accountingLedger.getAmount()) {
+                continue; // Skip to next iteration
+            }
+
+            // Print accountingLedger object if it passed all filters
+            System.out.println(accountingLedger.toString());
+        }
+
+
+
     }
 
 }
