@@ -4,10 +4,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -20,6 +19,8 @@ public class AccountingLedgerApp {
 
     private boolean validInput = false;
     private String header;
+    private int id = 0; // stores unique identifier that acts as a key for a hashmap
+
 
     public void run(){
         loadaccountingLedgerRecord();
@@ -30,7 +31,6 @@ public class AccountingLedgerApp {
         try {
             FileInputStream fileInputStream = new FileInputStream("transactions.csv");
             scanner = new Scanner(fileInputStream);
-            int id = 0;
             header = scanner.nextLine();
             while (scanner.hasNextLine()){
 
@@ -43,10 +43,10 @@ public class AccountingLedgerApp {
 
                 String description = transaction[2];
                 String vendor = transaction[3];
-                Double price = Double.parseDouble(transaction[4]);
+                Double amount = Double.parseDouble(transaction[4]);
 
 
-                accountingLedgerRecord.put(id, new AccountingLedger(id,dateTime,description,vendor,price));
+                accountingLedgerRecord.put(id, new AccountingLedger(id,dateTime,description,vendor,amount));
             }
 
         } catch (FileNotFoundException e) {
@@ -89,7 +89,7 @@ public class AccountingLedgerApp {
                 case "l":
                 case "L": {
                     validInput = true;
-                    displayAllEntries(); // navigate to ledger screen
+                    ledgerScreen(); // navigate to ledger screen
                     break;
                 }
                 case "X": {System.exit(1);break; }// exit the program
@@ -107,6 +107,7 @@ public class AccountingLedgerApp {
         System.out.print("Please Enter the deposit amount: ");
         try {
             double deposit = scanner.nextDouble();
+            id++;
             scanner.nextLine();
 
              fileWriter= new FileWriter("transactions.csv",true);
@@ -119,9 +120,20 @@ public class AccountingLedgerApp {
                 addDeposit();
             }
 
+            System.out.print("Please enter the vendor: ");
+            String vendor = scanner.nextLine().trim(); // store the vendor name entered by the user
+
+            if (vendor.equalsIgnoreCase("")){
+                System.out.println("Vendor name cannot be blank."); // warning message
+                makePayment();
+            }
+
              fileWriter.write(LocalDate.now() +"| "
                      + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
                      +"|"+description+"|Joe"+"|"+deposit+"\n"); // write to file
+
+
+            accountingLedgerRecord.put(id, new AccountingLedger(id,LocalDateTime.now(),description,vendor,deposit));
 
             System.out.println("Deposit made"); // success message
 
@@ -154,7 +166,8 @@ public class AccountingLedgerApp {
         try {
             double deposit = scanner.nextDouble();
             scanner.nextLine();
-            deposit = -deposit;
+            id++;
+            deposit = -deposit; // negate the value of deposit
 
             fileWriter= new FileWriter("transactions.csv",true);
 
@@ -178,6 +191,8 @@ public class AccountingLedgerApp {
                     + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
                     +"|"+description+"|"+vendor+"|"+deposit+"\n"); // write to file
 
+            accountingLedgerRecord.put(id, new AccountingLedger(id,LocalDateTime.now(),description,vendor,deposit));
+
             System.out.println("Payment made"); // success message
         }
 
@@ -198,7 +213,7 @@ public class AccountingLedgerApp {
 
                 homeScreen(); // navigate to home screen
             }
-            
+
             catch (Exception e){
                 System.out.println("Something went wrong!"); // error message
                 makePayment();// recursive call
@@ -208,23 +223,259 @@ public class AccountingLedgerApp {
 
         }
 
-    public void displayAllEntries() {
+    public void ledgerScreen(){
+        System.out.println("========================");
+        System.out.println("LEDGER SCREEN");
+        System.out.println("========================");
+        System.out.println("'A' - Display all entries");
+        System.out.println("'D' - Display deposits");
+        System.out.println("'P' - Display payments");
+        System.out.println("'R' - Report");
+        System.out.println("'0' - Home screen");
+        System.out.print("Select a command: ");
+        String userInput = scanner.nextLine(); // store user input
+
+        if(userInput.equalsIgnoreCase("A")) //
+        {
+            displayEntries(userInput);
+        } else if (userInput.equalsIgnoreCase("D")) //
+        {
+            displayEntries(userInput);
+        }
+        else if(userInput.equalsIgnoreCase("P"))
+        {
+            displayEntries(userInput);
+        } else if (userInput.equalsIgnoreCase("R"))
+        {
+            reportScreen();
+        } else if (userInput.equalsIgnoreCase("0"))
+        {
+            homeScreen();
+        }
+
+    }
+    public void displayEntries(String entryType) {
 
         String[] headerContent = header.split("\\|");
-        System.out.printf("%-11s|%-9s|%-20s|%-10s|%-7s|\n",headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
+        System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
         System.out.println("------------------------------------------------------------");
 
         for (AccountingLedger accountingLedger: accountingLedgerRecord.values()){
 
             String date = String.valueOf(accountingLedger.getDate().toLocalDate());
-            String time = String.valueOf(accountingLedger.getDate().toLocalTime());
+            String time = accountingLedger.getDate().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
             String description = accountingLedger.getDescription();
             String vendor = accountingLedger.getVendor();
             String amount = String.valueOf(accountingLedger.getAmount());
 
-            System.out.printf("%-11s|%9s|%-20s|%-10s|%7s|\n",date,time,description,vendor,amount);
-            System.out.println("------------------------------------------------------------");
+            // display only payments
+            if (entryType.equalsIgnoreCase("p") && accountingLedger.getAmount() < 0)
+                System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                        "------------------------------------------------------------\n"
+                        ,date,time,description,vendor,amount);
 
+            // display only deposits
+            if (entryType.equalsIgnoreCase("d") && accountingLedger.getAmount() >= 0)
+                System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                        "------------------------------------------------------------\n",
+                        date,time,description,vendor,amount);
+
+            //display all entries
+            if (entryType.equalsIgnoreCase("a"))
+                System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                        "------------------------------------------------------------\n"
+                        ,date,time,description,vendor,amount);
+        }
+
+        homeScreen();
+    }
+
+    public void reportScreen(){
+
+        System.out.println("========================");
+        System.out.println("Report SCREEN");
+        System.out.println("========================");
+        System.out.println("1 - Month To Date");
+        System.out.println("2 - Previous Month");
+        System.out.println("3 - Year To Date");
+        System.out.println("4 - Previous Year");
+        System.out.println("5 - Search By Vendor");
+        System.out.println("6 - Home screen");
+        String userInput = scanner.nextLine();
+        switch (userInput){
+
+            case "1": {
+                System.out.println("Month to Date");
+                String[] headerContent = header.split("\\|");
+
+                System.out.println("-------------------------------------------------------------------");
+                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
+                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
+                System.out.println("-------------------------------------------------------------------");
+
+                int year = LocalDateTime.now().getYear();
+
+                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+                    // stores the accounting ledger month
+                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+
+                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
+                    String time = accountingLedger.getDate().toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    String description = accountingLedger.getDescription();
+                    String vendor = accountingLedger.getVendor();
+                    String amount = String.valueOf(accountingLedger.getAmount());
+
+                    if ((accountLedgerYear == year))
+                    {
+                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                                        "-------------------------------------------------------------------\n"
+                                ,date,time,description,vendor,amount);                    }
+
+                }
+
+                ;break;}
+            case "2": {
+                System.out.println("Previous Month");
+
+
+                int year = LocalDateTime.now().getYear(); // stores the current year
+                Month previousMonth = LocalDateTime.now().minusMonths(1).getMonth(); // stores the previous month
+
+                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+                    // stores the accounting ledger month
+                    Month accountingLedgerMonth = accountingLedger.getDate().getMonth();
+                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+
+                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
+                    String time = accountingLedger.getDate().toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    String description = accountingLedger.getDescription();
+                    String vendor = accountingLedger.getVendor();
+                    String amount = String.valueOf(accountingLedger.getAmount());
+
+
+                    if ((accountingLedgerMonth.equals(previousMonth)) && (accountLedgerYear == year))
+                    {
+                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                                        "-------------------------------------------------------------------\n"
+                                ,date,time,description,vendor,amount);                    }
+
+                }
+
+                break;}
+            case "3": {
+
+                System.out.println("Year to Date");
+                String[] headerContent = header.split("\\|");
+
+                System.out.println("-------------------------------------------------------------------");
+                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
+                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
+                System.out.println("-------------------------------------------------------------------");
+
+                LocalDateTime currentDate = LocalDateTime.now();
+
+                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+                    // stores the accounting ledger month
+                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+
+                    // Converting the date of the accountingLedger object to a string representation
+                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
+
+                    // Formatting the time of the accountingLedger object to a string representation
+                    String time = accountingLedger.getDate().toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+                    // Extracting the description of the accountingLedger object
+                    String description = accountingLedger.getDescription();
+
+                    // Extracting the vendor name of the accountingLedger object
+                    String vendor = accountingLedger.getVendor();
+
+                    // Converting the amount of the accountingLedger object to a string representation
+                    String amount = String.valueOf(accountingLedger.getAmount());
+
+
+                    if (accountingLedger.getDate().toLocalDate()
+                            .isAfter(currentDate.toLocalDate().minusYears(1)) &&
+                            accountingLedger.getDate().toLocalDate()
+                                    .isBefore(currentDate.toLocalDate().plusDays(1)))
+                    {
+                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                                        "-------------------------------------------------------------------\n"
+                                ,date,time,description,vendor,amount);                    }
+
+                }
+
+                break;}
+            case "4": {
+                System.out.println("Previous Year");
+                String[] headerContent = header.split("\\|");
+
+                System.out.println("-------------------------------------------------------------------");
+                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
+                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
+                System.out.println("-------------------------------------------------------------------");
+
+                int previousYear = LocalDateTime.now().minusYears(1).getYear();
+
+                for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
+
+                    // stores the accounting ledger month
+                    int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+
+                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
+                    String time = accountingLedger.getDate().toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    String description = accountingLedger.getDescription();
+                    String vendor = accountingLedger.getVendor();
+                    String amount = String.valueOf(accountingLedger.getAmount());
+
+                    if (accountLedgerYear == previousYear)
+                    {
+                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                                        "-------------------------------------------------------------------\n"
+                                ,date,time,description,vendor,amount);                    }
+
+                }
+                break;}
+            case "5": {
+                System.out.println("Search By Vendor");
+                System.out.print("Enter the vendor's name: ");
+                String vendorName = scanner.nextLine();
+
+                String[] headerContent = header.split("\\|");
+
+                System.out.println("-------------------------------------------------------------------");
+                System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",
+                        headerContent[0],headerContent[1],headerContent[2],headerContent[3],headerContent[4]);
+                System.out.println("-------------------------------------------------------------------");
+
+                for (AccountingLedger accountingLedger: accountingLedgerRecord.values())
+                {
+
+                    String date = String.valueOf(accountingLedger.getDate().toLocalDate());
+                    String time = accountingLedger.getDate().toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    String description = accountingLedger.getDescription();
+                    String vendor = accountingLedger.getVendor();
+                    String amount = String.valueOf(accountingLedger.getAmount());
+
+                    if (accountingLedger.getVendor().equalsIgnoreCase(vendorName))
+                    {
+                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                                        "-------------------------------------------------------------------\n"
+                                ,date,time,description,vendor,amount);
+                    }
+                    }
+                break;}
+            case "6": {
+                homeScreen();
+                break;}
         }
     }
 
