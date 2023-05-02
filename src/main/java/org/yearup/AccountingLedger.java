@@ -1,6 +1,7 @@
 package org.yearup;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class AccountingLedger {
     int id;
@@ -57,14 +58,10 @@ public class AccountingLedger {
         this.amount = amount;
     }
 
-    @Override
-    public String toString() {
-        return "AccountingLedger{" +
-                "date=" + date +
-                ", description='" + description + '\'' +
-                ", vendor='" + vendor + '\'' +
-                ", amount=" + amount +
-                '}';
+    public String displayAsString() {
+        return String.format("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+                        "-------------------------------------------------------------------\n"
+                ,date.toLocalDate(),date.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")),description,vendor,amount);
     }
 
 }

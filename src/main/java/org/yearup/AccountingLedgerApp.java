@@ -419,9 +419,7 @@ public class AccountingLedgerApp {
 
                     if (accountingLedger.getVendor().equalsIgnoreCase(vendorName))
                     {
-                        System.out.printf("%-11s|%9s|%-20s|%-15s|%7s|\n" +
-                                        "-------------------------------------------------------------------\n"
-                                ,date,time,description,vendor,amount);
+                        System.out.printf(accountingLedger.displayAsString());
                     }
                     }
                 break;}
@@ -497,7 +495,7 @@ public class AccountingLedgerApp {
             }
 
             // Print accountingLedger object if it passed all filters
-            System.out.println(accountingLedger.toString());
+            System.out.println(accountingLedger.displayAsString());
         }
 
     }
