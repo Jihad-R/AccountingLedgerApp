@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -62,9 +61,8 @@ public class AccountingLedgerApp {
 
         scanner = new Scanner(System.in); // Get input stream from user keyboard
         //accounting ledger app header
-        System.out.println("========================");
-        System.out.println("ACCOUNTING LEDGER APP");
-        System.out.println("========================");
+        displayScreenHeader("Accounting Ledger App");
+        
         //display options to user
         System.out.println("'D' - Add Deposit");
         System.out.println("'P' - Make Payment (Debit)");
@@ -106,7 +104,7 @@ public class AccountingLedgerApp {
         }while(!validInput);
     }
 
-    private void writeTransaction(String type, double amount) {
+    private void recordTransaction(String type, double amount) {
         try {
             id++;
             fileWriter= new FileWriter("transactions.csv",true);
@@ -119,7 +117,8 @@ public class AccountingLedgerApp {
                 System.out.print("Enter the description: ");
                 description = scanner.nextLine().trim();
                 if (description.isBlank()) {
-                    System.out.println("Description cannot be empty.");
+                    //warning message
+                    System.out.println(ColorCodes.YELLOW+"Description cannot be empty."+ColorCodes.RESET);
                 }
             }
 
@@ -128,7 +127,8 @@ public class AccountingLedgerApp {
                 System.out.print("Enter the vendor: ");
                 vendor = scanner.nextLine().trim();
                 if (vendor.isBlank()) {
-                    System.out.println("Vendor name cannot be blank.");
+                    // warning message
+                    System.out.println(ColorCodes.YELLOW+"Vendor name cannot be blank."+ColorCodes.YELLOW);
                 }
             }
 
@@ -146,11 +146,13 @@ public class AccountingLedgerApp {
 
 
         } catch (InputMismatchException e){
-            System.out.println("Please enter a numeric value."); // error message
+            // error message
+            System.out.println(ColorCodes.RED+"Please enter a numeric value."+ColorCodes.RESET);
             homeScreen();
         } catch (IOException ex)
         {
-            System.out.println("File Not Found!"); //error message
+            //error message
+            System.out.println(ColorCodes.RED+"File Not Found!"+ColorCodes.RESET);
             homeScreen(); //navigate to home screen
         }
         finally
@@ -161,7 +163,8 @@ public class AccountingLedgerApp {
 
                 homeScreen(); // navigate to home screen
             } catch (Exception e){
-                System.out.println("Something went wrong!"); // error message
+                // error message
+                System.out.println(ColorCodes.RED+"Something went wrong!"+ColorCodes.RESET);
                 homeScreen(); // navigate to home screen
             }
         }
@@ -173,10 +176,11 @@ public class AccountingLedgerApp {
                 double amount = scanner.nextDouble();
 
                 scanner.nextLine();
-                writeTransaction(transactionType, amount);
+                recordTransaction(transactionType, amount);
             }
             catch (InputMismatchException e){
-                System.out.println("\nInvalid amount! Please enter a numeric value.");
+                //error message
+                System.out.println(ColorCodes.RED+"\nInvalid amount! Please enter a numeric value."+ColorCodes.RESET);
                 scanner.nextLine();
                 makeTransaction(transactionType);
             }
@@ -184,9 +188,7 @@ public class AccountingLedgerApp {
 
     public void ledgerScreen(){
         // display Ledger Screen Header
-        System.out.println("========================");
-        System.out.println("LEDGER SCREEN");
-        System.out.println("========================");
+        displayScreenHeader("Ledger Screen");
 
         // display options for the ledger screen
         System.out.println("'A' - Display all entries");
@@ -212,7 +214,8 @@ public class AccountingLedgerApp {
                 homeScreen();
                 break;
             default:
-                System.out.println("Unrecognized command! Please try again."); // warning message
+                // warning message
+                System.out.println(ColorCodes.YELLOW+"Unrecognized command! Please try again."+ColorCodes.RESET);
                 ledgerScreen();
                 break;
         }
@@ -224,6 +227,12 @@ public class AccountingLedgerApp {
         System.out.println("-------------------------------------------------------------------");
         System.out.printf("%-11s|%-9s|%-20s|%-15s|%-7s|\n",header.split("\\|"));
         System.out.println("-------------------------------------------------------------------");
+    }
+
+    private void displayScreenHeader(String screenTitle){
+        System.out.println("========================");
+        System.out.println(screenTitle.toUpperCase());
+        System.out.println("========================");
     }
 
     public void displayEntries(String entryType) {
@@ -254,9 +263,7 @@ public class AccountingLedgerApp {
     public void reportScreen(){
 
         // display report screen header
-        System.out.println("========================");
-        System.out.println("Report SCREEN");
-        System.out.println("========================");
+        displayScreenHeader("Report Screen");
 
         // display options for the report screen
         System.out.println("1 - Month To Date");
@@ -273,37 +280,28 @@ public class AccountingLedgerApp {
 
             case "1": {
                 System.out.println("Month to Date");
-
-                monthToDateReport();
-
-                ;break;
+                makeReport("monthToDate");
+                break;
             }
             case "2": {
                 System.out.println("Previous Month");
-
-                previousMonthReport();
-
+                makeReport("previousMonth");
                 break;
             }
             case "3": {
 
                 System.out.println("Year to Date");
-
-                yearToDateReport();
-
+                makeReport("yearToDate");
                 break;
             }
             case "4": {
                 System.out.println("Previous Year");
-
-                previousYearReport();
-
+                makeReport("previousYear");
                 break;
             }
             case "5": {
                 System.out.println("Search By Vendor");
-
-                searchByVendorReport();
+                makeReport("vendor");
 
                 break;
             }
@@ -316,101 +314,68 @@ public class AccountingLedgerApp {
                 break;
             }
             default:{
-                System.out.println("Invalid input! Please try again.");reportScreen();break;}
+                System.out.println(ColorCodes.YELLOW+"Invalid input! Please try again."+ColorCodes.RESET); // warning message
+                reportScreen();
+                break;
+            }
         }
 
     }
 
-    private void searchByVendorReport() {
 
-        System.out.print("Enter the vendor's name: ");
-        String vendorName = scanner.nextLine();
+    private void makeReport(String reportType)
+    {
+        int previousYear = LocalDateTime.now().minusYears(1).getYear();
+        int year = LocalDateTime.now().getYear(); // stores the current year
+        Month currentMonth = LocalDateTime.now().getMonth();
+        Month previousMonth = LocalDateTime.now().minusMonths(1).getMonth(); // stores the previous month
+        String vendorName = null;
 
-        displayTableHeader();
+        if(reportType.equals("vendor"))
+        {
+            System.out.print("Enter vendor name: ");
+            vendorName = scanner.nextLine();
+            displayTableHeader();
+        }
+
+        else
+        {
+            displayTableHeader();
+        }
 
         for (AccountingLedger accountingLedger: accountingLedgerRecord.values())
         {
 
-            if (accountingLedger.getVendor().equalsIgnoreCase(vendorName))
-            {
-                System.out.printf(accountingLedger.displayAsString());
-            }
-        }
-
-
-        System.out.print("\nPress any key to go to the ledger screen: ");
-        scanner.nextLine();
-
-        ledgerScreen();
-
-    }
-
-    private void previousYearReport() {
-
-        int previousYear = LocalDateTime.now().minusYears(1).getYear();
-
-        displayTableHeader();
-
-        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-            // stores the accounting ledger month
             int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
-
-            if (accountLedgerYear == previousYear)
-            {
-                System.out.printf(accountingLedger.displayAsString());
-            }
-
-        }
-
-        System.out.print("\nPress any key to go to the ledger screen: ");
-        scanner.nextLine();
-
-        ledgerScreen();
-    }
-
-    private void yearToDateReport() {
-
-        LocalDateTime currentDate = LocalDateTime.now();
-
-        displayTableHeader();
-
-        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-            if (accountingLedger.getDate().toLocalDate()
-                    .isAfter(currentDate.toLocalDate().minusYears(1)) &&
-                    accountingLedger.getDate().toLocalDate()
-                            .isBefore(currentDate.toLocalDate()))
-            {
-                System.out.print(accountingLedger.displayAsString());
-            }
-
-        }
-
-        System.out.print("\nPress any key to go to the ledger screen: ");
-        scanner.nextLine();
-
-        ledgerScreen();
-
-    }
-
-    private void previousMonthReport() {
-
-        int year = LocalDateTime.now().getYear(); // stores the current year
-        Month previousMonth = LocalDateTime.now().minusMonths(1).getMonth(); // stores the previous month
-
-        displayTableHeader();
-
-        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-            // stores the accounting ledger month
             Month accountingLedgerMonth = accountingLedger.getDate().getMonth();
-            int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
 
-            if ((accountingLedgerMonth.equals(previousMonth)) && (accountLedgerYear == year))
+
+
+            if (reportType.equals("vendor") && !(accountingLedger.getVendor().equalsIgnoreCase(vendorName))) {
+                    continue;
+                }
+
+            if (reportType.equals("previousYear")&& !(accountLedgerYear == previousYear))
             {
-                System.out.print(accountingLedger.displayAsString());
+                continue;
             }
+
+            if (reportType.equals("monthToDate") && !(accountingLedgerMonth == currentMonth))
+            {
+                continue;
+            }
+
+            if ((reportType.equals("previousMonth")) &&
+                    !(accountingLedgerMonth.equals(previousMonth) && accountLedgerYear == year))
+            {
+               continue;
+            }
+
+            if (reportType.equals("yearToDate") && !(accountLedgerYear == year))
+            {
+                continue;
+            }
+                System.out.print(accountingLedger.displayAsString());
 
         }
 
@@ -418,30 +383,7 @@ public class AccountingLedgerApp {
         scanner.nextLine();
 
         ledgerScreen();
-    }
 
-    private void monthToDateReport() {
-
-        displayTableHeader();
-
-        int year = LocalDateTime.now().getYear();
-
-        for(AccountingLedger accountingLedger: accountingLedgerRecord.values()){
-
-            // stores the accounting ledger month
-            int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
-
-            if ((accountLedgerYear == year))
-            {
-                System.out.print(accountingLedger.displayAsString());
-            }
-
-        }
-
-        System.out.print("\nPress any key to go to the ledger screen: ");
-        scanner.nextLine();
-
-        ledgerScreen();
     }
 
     private void customSearch() {
@@ -461,9 +403,17 @@ public class AccountingLedgerApp {
         System.out.print("Vendor (leave blank to skip): ");
         String vendor = scanner.nextLine().trim();
 
-        System.out.print("Amount (leave blank to skip): ");
-        String amount = scanner.nextLine().trim();
-
+        String amount = "";
+        try {
+            System.out.print("Amount (leave blank to skip): ");
+            amount = scanner.nextLine().trim();
+            Double.parseDouble(amount);
+        }
+        catch (NumberFormatException e){
+            //error message
+            System.out.println(ColorCodes.RED+"Invalid amount! Please try again."+ColorCodes.RESET);
+            customSearch();
+        }
         // Convert string start and end date values to LocalDate objects if not empty
         LocalDate startDate = null;
         LocalDate endDate = null;
@@ -516,5 +466,4 @@ public class AccountingLedgerApp {
         ledgerScreen();
 
     }
-
 }
