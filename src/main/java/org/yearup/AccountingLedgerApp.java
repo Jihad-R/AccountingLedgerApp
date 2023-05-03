@@ -213,7 +213,7 @@ public class AccountingLedgerApp {
                 reportScreen();
                 break;
             case "0":
-                homeScreen();
+                homeScreen(); // go back to home screen
                 break;
             default:
                 // warning message
