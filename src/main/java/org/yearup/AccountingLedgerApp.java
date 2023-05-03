@@ -22,11 +22,11 @@ public class AccountingLedgerApp {
 
 
     public void run(){
-        loadaccountingLedgerRecord();
+        loadAccountingLedgerRecord();
         homeScreen();
     }
 
-    public void loadaccountingLedgerRecord(){
+    public void loadAccountingLedgerRecord(){
         try {
             FileInputStream fileInputStream = new FileInputStream("transactions.csv");
             scanner = new Scanner(fileInputStream);
@@ -62,7 +62,7 @@ public class AccountingLedgerApp {
         scanner = new Scanner(System.in); // Get input stream from user keyboard
         //accounting ledger app header
         displayScreenHeader("Accounting Ledger App");
-        
+
         //display options to user
         System.out.println("'D' - Add Deposit");
         System.out.println("'P' - Make Payment (Debit)");
@@ -98,7 +98,9 @@ public class AccountingLedgerApp {
                     break;
                 }
                 default : {
-                    System.out.println("Unrecognized input! Please try again."); // error message
+                    // error message
+                    System.out.println(ColorCodes.YELLOW+"Unrecognized input! Please try again."+ColorCodes.RESET);
+                    homeScreen();
                 }
             }
         }while(!validInput);
@@ -230,13 +232,20 @@ public class AccountingLedgerApp {
     }
 
     private void displayScreenHeader(String screenTitle){
-        System.out.println("========================");
+        System.out.println("\n========================");
         System.out.println(screenTitle.toUpperCase());
         System.out.println("========================");
     }
 
     public void displayEntries(String entryType) {
+        HashMap<String,String> titleHeader =  new HashMap<String, String>() {{
+            put("A","All Entries");
+            put("D","Deposit Entries");
+            put("P","Payment Entries");
+        }};
 
+        System.out.println();
+        System.out.println(titleHeader.get(entryType));
         displayTableHeader();
 
         for (AccountingLedger accountingLedger: accountingLedgerRecord.values()){
@@ -275,6 +284,8 @@ public class AccountingLedgerApp {
         System.out.println("7 - Custom Search");
         System.out.print("Please select command: ");
         String userInput = scanner.nextLine();
+
+        System.out.println();
 
         switch (userInput){
 
