@@ -34,6 +34,7 @@ public class AccountingLedgerApp {
         homeScreen(); // display home screen
     }
 
+    // Load accounting ledger record hashmap with data from 'transaction.csv'
     public void loadAccountingLedgerRecord() {
         try {
             FileInputStream fileInputStream = new FileInputStream("transactions.csv");
@@ -65,6 +66,7 @@ public class AccountingLedgerApp {
         }
     }
 
+    // Returns table header
     private String tableHeader() {
 
         return String.format("---------------------------------" +
@@ -74,6 +76,7 @@ public class AccountingLedgerApp {
                 "----------------------------\n",header.split("\\|"));
     }
 
+    // Displays Screen headers
     private void displayScreenHeader(String screenTitle) {
 
         System.out.println("\n========================");
@@ -81,6 +84,7 @@ public class AccountingLedgerApp {
         System.out.println("========================");
     }
 
+    //Display home screen
     private void homeScreen() {
 
         scanner = new Scanner(System.in); // Get input stream from user keyboard
@@ -126,6 +130,7 @@ public class AccountingLedgerApp {
         } while (!validInput);
     }
 
+    // Displays ledger screen
     private void ledgerScreen() {
         // display Ledger Screen Header
         displayScreenHeader("Ledger Screen");
@@ -162,6 +167,7 @@ public class AccountingLedgerApp {
 
     }
 
+    // Displays report screen
     private void reportScreen() {
 
         // display report screen header
@@ -233,6 +239,8 @@ public class AccountingLedgerApp {
         }
 
     }
+
+    // Make transaction (deposit/payment)
     private void makeTransaction(String transactionType) {
         System.out.println(("\nMake " + transactionType + ": ").toUpperCase());
         try {
@@ -258,6 +266,7 @@ public class AccountingLedgerApp {
         }
     }
 
+    // Write transaction from the accountingLedgerRecord hashmap into the CSV file
     private void recordTransaction(String type, double amount) {
         try {
             id++;
@@ -323,7 +332,7 @@ public class AccountingLedgerApp {
         }
     }
 
-
+    //Displays accounting ledger entries
     private void displayEntries(String entryType) {
         // create a HashMap to store the titles of the different entry types
         HashMap<String, String> titleHeader = new HashMap<String, String>() {{
@@ -367,6 +376,7 @@ public class AccountingLedgerApp {
     }
 
 
+    // Generate Reports
     private void makeReport(String reportType) {
         // Get the current year and months, and the previous year and month.
         int year = LocalDateTime.now().getYear();
@@ -435,6 +445,8 @@ public class AccountingLedgerApp {
 
     }
 
+    
+    //Perform custom search
     private void customSearch() {
 
         // Create a StringBuilder to store the report.
