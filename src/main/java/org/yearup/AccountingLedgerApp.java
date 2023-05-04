@@ -12,13 +12,25 @@ import java.util.Scanner;
 
 public class AccountingLedgerApp {
 
+    // Create a private HashMap to store AccountingLedger objects
     private HashMap<Integer,AccountingLedger> accountingLedgerRecord = new HashMap<>();
+
+    // Create a private Scanner object
     private Scanner scanner;
+
+    // Create a FileWriter object and initialize it to null
     private FileWriter fileWriter = null;
 
+// Create a boolean variable to check for valid input
     private boolean validInput = false;
+
+    // Create String variables to store header and user input
     private String header;
-    private int id = 0; // stores unique identifier that acts as a key for a hashmap
+    private String userInput;
+
+    // Create an integer variable to store a unique identifier for each object in the HashMap
+    private int id = 0;
+
 
 
     public void run(){
@@ -71,7 +83,7 @@ public class AccountingLedgerApp {
 
         do {
             System.out.print("Please select a command: ");
-            String userInput = scanner.nextLine().toUpperCase().trim(); // get user Input
+            userInput = scanner.nextLine().toUpperCase().trim(); // get user Input
 
             switch (userInput){
                 case "D":
@@ -144,16 +156,18 @@ public class AccountingLedgerApp {
 
             accountingLedgerRecord.put(id, new AccountingLedger(id,LocalDateTime.now(),description,vendor,amount));
 
-            System.out.println(type.equals("deposit") ? "Deposit made" : "Payment made"); // success message
+            // success message in blue
+            System.out.println(type.equals("deposit") ? ColorCodes.PURPLE+"Deposit made"+ColorCodes.RESET :
+                    ColorCodes.PURPLE+"Payment made"+ColorCodes.RESET);
 
 
         } catch (InputMismatchException e){
-            // error message
+            // error message in red
             System.out.println(ColorCodes.RED+"Please enter a numeric value."+ColorCodes.RESET);
             homeScreen();
         } catch (IOException ex)
         {
-            //error message
+            //error message in red
             System.out.println(ColorCodes.RED+"File Not Found!"+ColorCodes.RESET);
             homeScreen(); //navigate to home screen
         }
@@ -165,7 +179,7 @@ public class AccountingLedgerApp {
 
                 homeScreen(); // navigate to home screen
             } catch (Exception e){
-                // error message
+                // error message in red
                 System.out.println(ColorCodes.RED+"Something went wrong!"+ColorCodes.RESET);
                 homeScreen(); // navigate to home screen
             }
@@ -174,16 +188,25 @@ public class AccountingLedgerApp {
 
     public void makeTransaction(String transactionType){
             try {
+                // Prompt the user to enter the amount for the specified transaction type
                 System.out.printf("Please enter the %s amount: ",transactionType);
                 double amount = scanner.nextDouble();
 
+                // Consume the newline character left in the input buffer
                 scanner.nextLine();
+
+                // Call the recordTransaction method, passing in the transaction type and amount as parameters
                 recordTransaction(transactionType, amount);
             }
             catch (InputMismatchException e){
-                //error message
+                // If the user inputs an invalid amount (i.e. not a double), catch the InputMismatchException
+                // Display an error message in red text
                 System.out.println(ColorCodes.RED+"\nInvalid amount! Please enter a numeric value."+ColorCodes.RESET);
+
+                // Consume the newline character left in the input buffer
                 scanner.nextLine();
+
+                // Call the makeTransaction method again, passing in the transaction type as a parameter
                 makeTransaction(transactionType);
             }
     }
@@ -200,7 +223,7 @@ public class AccountingLedgerApp {
         System.out.println("'0' - Home screen");
         System.out.print("Select a command: ");
 
-        String userInput = scanner.nextLine().toUpperCase(); // store user input
+        userInput = scanner.nextLine().toUpperCase(); // store user input
 
         // execute the corresponding command based on the user input
         switch (userInput) {
@@ -238,14 +261,18 @@ public class AccountingLedgerApp {
     }
 
     public void displayEntries(String entryType) {
+        // create a HashMap to store the titles of the different entry types
         HashMap<String,String> titleHeader =  new HashMap<String, String>() {{
             put("A","All Entries");
             put("D","Deposit Entries");
             put("P","Payment Entries");
         }};
 
+        // print a blank line and the title of the entry type
         System.out.println();
         System.out.println(titleHeader.get(entryType));
+
+        // print the table header
         displayTableHeader();
 
         for (AccountingLedger accountingLedger: accountingLedgerRecord.values()){
@@ -283,7 +310,7 @@ public class AccountingLedgerApp {
         System.out.println("6 - Home screen");
         System.out.println("7 - Custom Search");
         System.out.print("Please select command: ");
-        String userInput = scanner.nextLine();
+        userInput = scanner.nextLine();
 
         System.out.println();
 
@@ -325,7 +352,8 @@ public class AccountingLedgerApp {
                 break;
             }
             default:{
-                System.out.println(ColorCodes.YELLOW+"Invalid input! Please try again."+ColorCodes.RESET); // warning message
+                // warning message
+                System.out.println(ColorCodes.YELLOW+"Invalid input! Please try again."+ColorCodes.RESET);
                 reportScreen();
                 break;
             }
@@ -336,32 +364,37 @@ public class AccountingLedgerApp {
 
     private void makeReport(String reportType)
     {
-        int previousYear = LocalDateTime.now().minusYears(1).getYear();
-        int year = LocalDateTime.now().getYear(); // stores the current year
+        // Get the current year and months, and the previous year and month.
+        int year = LocalDateTime.now().getYear();
         Month currentMonth = LocalDateTime.now().getMonth();
-        Month previousMonth = LocalDateTime.now().minusMonths(1).getMonth(); // stores the previous month
+        Month previousMonth = LocalDateTime.now().minusMonths(1).getMonth();
+        int previousYear = LocalDateTime.now().minusYears(1).getYear();
+
+        // Initialize the vendor name to null.
         String vendorName = null;
 
+        // If the report type is "vendor", prompt the user to enter the vendor name.
         if(reportType.equals("vendor"))
         {
             System.out.print("Enter vendor name: ");
             vendorName = scanner.nextLine();
-            displayTableHeader();
         }
 
-        else
-        {
-            displayTableHeader();
-        }
+        // Display the table header.
+        displayTableHeader();
 
+        // Create a StringBuilder to store the report.
+        StringBuilder reportBuilder = new StringBuilder();
+
+        // Loop through each AccountingLedger in the accountingLedgerRecord HashMap.
         for (AccountingLedger accountingLedger: accountingLedgerRecord.values())
         {
 
-            int accountLedgerYear = accountingLedger.getDate().getYear(); // stores the accounting ledger year
+            // Get the year and month of the AccountingLedger.
+            int accountLedgerYear = accountingLedger.getDate().getYear();
             Month accountingLedgerMonth = accountingLedger.getDate().getMonth();
 
-
-
+            // Check if the AccountingLedger should be skipped based on the report type.
             if (reportType.equals("vendor") && !(accountingLedger.getVendor().equalsIgnoreCase(vendorName))) {
                     continue;
                 }
@@ -386,14 +419,18 @@ public class AccountingLedgerApp {
             {
                 continue;
             }
-                System.out.print(accountingLedger.displayAsString());
+
+            // If the AccountingLedger is not skipped, add its string representation to the report.
+            reportBuilder.append(accountingLedger.displayAsString());
 
         }
 
+        System.out.println(reportBuilder.toString());// Display the report.
+
+        // Prompt the user to press any key to return to the ledger screen.
         System.out.print("\nPress any key to go to the ledger screen: ");
         scanner.nextLine();
-
-        ledgerScreen();
+        ledgerScreen(); // return to the ledger screen.
 
     }
 
