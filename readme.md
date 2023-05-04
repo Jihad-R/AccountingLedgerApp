@@ -1,13 +1,13 @@
-# 🧾Accounting Ledger App
+# Accounting Ledger App 🧾
 
 The Accounting Ledger App is a simple Java program that simulates an accounting ledger. It allows the user to add deposits, make payments, view the ledger, and exit the program. Transactions are stored in a CSV file named "transactions.csv" and loaded into a `HashMap` when the program starts.
-## 🚀 Getting Started
+## Getting Started 🚀 
 
 To run this application, you'll need to have Java installed on your computer. You can download the latest version of Java [here](https://www.java.com/en/download/).
 
 Once you have Java installed, open the IntellJ IDE. Then navigate to the main.java file and press run.
 
-## Interesting Code
+## Interesting Code <img src="https://github.com/devicons/devicon/blob/master/icons/java/java-original-wordmark.svg" title="Java" alt="Java" width="40" height="40"/>&nbsp; 
 
 This code is interesting because it demonstrates the use of the ternary operator ? in Java to provide a concise way of writing conditional statements. The ternary operator allows for a shorthand way of writing if-else statements, and in this case, it is used to determine whether a deposit or payment has been made and print a success message.  Moreover, the use of different text colors for success messages can help to make the output more visually appealing and easier to read.
 
@@ -15,7 +15,7 @@ This code is interesting because it demonstrates the use of the ternary operator
 System.out.println(type.equals("deposit") ? ColorCodes.PURPLE + "Deposit made" + ColorCodes.RESET :
 ColorCodes.PURPLE + "Payment made" + ColorCodes.RESET);`
 
-## 📷 CLI Screenshots
+## CLI Screenshots 📷 
 Home screen
 
 <img src="screenshots/homescreen.png" alt="home screen" height="400" width="500">
@@ -37,9 +37,9 @@ Entry Table (Sample)
 <img src="screenshots/displayentriessample.png" alt="Entry sample" height="400" width="500">
 
 ## 📘 How to use 
-### Accounting Ledger App
+### 🏠 Home Screen
 
-The "Accounting Ledger App" is a command-line interface application for managing financial transactions. Upon running the application, the user is presented with a menu screen containing four options:
+Upon running the application, the user is presented with a menu screen containing four options:
 
   - 'D' - Add Deposit: This option allows the user to add a new deposit entry to the ledger. A deposit represents an inflow of money into the account.
   - 'P' - Make Payment (Debit): This option allows the user to make a new payment (debit) entry in the ledger. A payment represents an outflow of money from the account.
