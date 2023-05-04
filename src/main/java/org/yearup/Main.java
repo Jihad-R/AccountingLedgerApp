@@ -5,7 +5,7 @@ public class Main {
 
         AccountingLedgerApp accountingLedgerApp = new AccountingLedgerApp();
 
-        accountingLedgerApp.run();
+        accountingLedgerApp.run(); // run accountingLedger App
 
     }
 }

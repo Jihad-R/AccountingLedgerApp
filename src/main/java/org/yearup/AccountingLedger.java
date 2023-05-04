@@ -71,7 +71,7 @@ public class AccountingLedger {
 
     // method to display the AccountingLedger object as a formatted string
     public String displayAsString() {
-        return String.format("%-11s|%9s|%-20s|%-15s|%7s|\n" +
+        return String.format("|%-11s|%9s|%-20s|%-15s|%7s|\n" +
                         "-------------------------------------------------------------------\n"
                 , date.toLocalDate(), date.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")),
                 description, vendor, amount);
