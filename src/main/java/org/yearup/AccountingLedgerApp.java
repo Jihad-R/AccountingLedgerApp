@@ -65,7 +65,23 @@ public class AccountingLedgerApp {
         }
     }
 
-    public void homeScreen() {
+    private String tableHeader() {
+
+        return String.format("---------------------------------" +
+                "----------------------------------\n"
+                + "|%-11s|%-9s|%-20s|%-15s|%-7s|\n" +
+                "---------------------------------------" +
+                "----------------------------\n",header.split("\\|"));
+    }
+
+    private void displayScreenHeader(String screenTitle) {
+
+        System.out.println("\n========================");
+        System.out.println(screenTitle.toUpperCase());
+        System.out.println("========================");
+    }
+
+    private void homeScreen() {
 
         scanner = new Scanner(System.in); // Get input stream from user keyboard
         //accounting ledger app header
@@ -110,97 +126,7 @@ public class AccountingLedgerApp {
         } while (!validInput);
     }
 
-    private void recordTransaction(String type, double amount) {
-        try {
-            id++;
-            fileWriter = new FileWriter("transactions.csv", true);
-
-            String description = "";
-            String vendor = "";
-
-            // Get non-blank description from user
-            while (description.isBlank()) {
-                System.out.print("Enter the description: ");
-                description = scanner.nextLine().trim();
-                if (description.isBlank()) {
-                    //warning message
-                    System.out.println(ColorCodes.YELLOW + "Description cannot be empty." + ColorCodes.RESET);
-                }
-            }
-
-            // Get non-blank vendor from user
-            while (vendor.isBlank()) {
-                System.out.print("Enter the vendor: ");
-                vendor = scanner.nextLine().trim();
-                if (vendor.isBlank()) {
-                    // warning message
-                    System.out.println(ColorCodes.YELLOW + "Vendor name cannot be blank." + ColorCodes.YELLOW);
-                }
-            }
-
-            if (type.equals("payment") && amount > 0) {
-                amount = -amount; // negate the value of payment amount
-            }
-
-            fileWriter.write(LocalDate.now() + "|"
-                    + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                    + "|" + description + "|" + vendor + "|" + amount + "\n"); // write to file
-
-            accountingLedgerRecord.put(id, new AccountingLedger(id, LocalDateTime.now(), description, vendor, amount));
-
-            // success message in blue
-            System.out.println(type.equals("deposit") ? ColorCodes.PURPLE + "Deposit made" + ColorCodes.RESET :
-                    ColorCodes.PURPLE + "Payment made" + ColorCodes.RESET);
-
-
-        } catch (InputMismatchException e) {
-            // error message in red
-            System.out.println(ColorCodes.RED + "Please enter a numeric value." + ColorCodes.RESET);
-            homeScreen();
-        } catch (IOException ex) {
-            //error message in red
-            System.out.println(ColorCodes.RED + "File Not Found!" + ColorCodes.RESET);
-            homeScreen(); //navigate to home screen
-        } finally {
-            try {
-                fileWriter.flush();
-                fileWriter.close();
-
-                homeScreen(); // navigate to home screen
-            } catch (Exception e) {
-                // error message in red
-                System.out.println(ColorCodes.RED + "Something went wrong!" + ColorCodes.RESET);
-                homeScreen(); // navigate to home screen
-            }
-        }
-    }
-
-    public void makeTransaction(String transactionType) {
-        System.out.println(("Make " + transactionType + ": ").toUpperCase());
-        try {
-            // Prompt the user to enter the amount for the specified transaction type
-            System.out.printf("Please enter the %s amount: ", transactionType);
-            double amount = scanner.nextDouble();
-
-            // Consume the newline character left in the input buffer
-            scanner.nextLine();
-
-            // Call the recordTransaction method, passing in the transaction type and amount as parameters
-            recordTransaction(transactionType, amount);
-        } catch (InputMismatchException e) {
-            // If the user inputs an invalid amount (i.e. not a double), catch the InputMismatchException
-            // Display an error message in red text
-            System.out.println(ColorCodes.RED + "\nInvalid amount! Please enter a numeric value." + ColorCodes.RESET);
-
-            // Consume the newline character left in the input buffer
-            scanner.nextLine();
-
-            // Call the makeTransaction method again, passing in the transaction type as a parameter
-            makeTransaction(transactionType);
-        }
-    }
-
-    public void ledgerScreen() {
+    private void ledgerScreen() {
         // display Ledger Screen Header
         displayScreenHeader("Ledger Screen");
 
@@ -236,67 +162,7 @@ public class AccountingLedgerApp {
 
     }
 
-    public String displayTableHeader() {
-
-        String tableHeader = String.format("---------------------------------" +
-                "----------------------------------\n"
-                + "|%-11s|%-9s|%-20s|%-15s|%-7s|\n" +
-                "---------------------------------------" +
-                "----------------------------\n",header.split("\\|"));
-
-        return tableHeader;
-    }
-
-    private void displayScreenHeader(String screenTitle) {
-
-        System.out.println("\n========================");
-        System.out.println(screenTitle.toUpperCase());
-        System.out.println("========================");
-    }
-
-    public void displayEntries(String entryType) {
-        // create a HashMap to store the titles of the different entry types
-        HashMap<String, String> titleHeader = new HashMap<String, String>() {{
-            put("A", "All Entries");
-            put("D", "Deposit Entries");
-            put("P", "Payment Entries");
-        }};
-        String entryTable = "";
-
-        // print a blank line and the title of the entry type
-        System.out.println();
-        System.out.println(titleHeader.get(entryType));
-
-        // Use a StringBuilder to accumulate the entries to display
-        StringBuilder entries = new StringBuilder();
-
-        // Loop through all entries in the accounting ledger
-        for (AccountingLedger accountingLedger : accountingLedgerRecord.values()) {
-
-            // Only include entries that match the requested entry type
-            if ((entryType.equals("P") && accountingLedger.getAmount() < 0)
-                    || (entryType.equals("D") && accountingLedger.getAmount() >= 0)
-                    || (entryType.equals("A"))) {
-
-                entries.append(accountingLedger.displayAsString());
-            }
-        }
-
-        // If there are entries to display, concatenate the table header and entries into a single string
-        if (entries.length() > 0)
-            entryTable = displayTableHeader() + entries.toString();
-
-        // Print the table header and entries
-        System.out.println(entryTable);
-
-        // Prompt the user to press any key to return to the ledger screen
-        System.out.print("\nPress any key to go to the ledger screen: ");
-        scanner.nextLine();
-
-        ledgerScreen();// Return to the ledger screen
-    }
-
-    public void reportScreen() {
+    private void reportScreen() {
 
         // display report screen header
         displayScreenHeader("Report Screen");
@@ -367,6 +233,139 @@ public class AccountingLedgerApp {
         }
 
     }
+    private void makeTransaction(String transactionType) {
+        System.out.println(("\nMake " + transactionType + ": ").toUpperCase());
+        try {
+            // Prompt the user to enter the amount for the specified transaction type
+            System.out.printf("Please enter the %s amount: ", transactionType);
+            double amount = scanner.nextDouble();
+
+            // Consume the newline character left in the input buffer
+            scanner.nextLine();
+
+            // Call the recordTransaction method, passing in the transaction type and amount as parameters
+            recordTransaction(transactionType, amount);
+        } catch (InputMismatchException e) {
+            // If the user inputs an invalid amount (i.e. not a double), catch the InputMismatchException
+            // Display an error message in red text
+            System.out.println(ColorCodes.RED + "\nInvalid amount! Please enter a numeric value." + ColorCodes.RESET);
+
+            // Consume the newline character left in the input buffer
+            scanner.nextLine();
+
+            // Call the makeTransaction method again, passing in the transaction type as a parameter
+            makeTransaction(transactionType);
+        }
+    }
+
+    private void recordTransaction(String type, double amount) {
+        try {
+            id++;
+            fileWriter = new FileWriter("transactions.csv", true);
+
+            String description = "";
+            String vendor = "";
+
+            // Get non-blank description from user
+            while (description.isBlank()) {
+                System.out.print("Enter the description: ");
+                description = scanner.nextLine().trim();
+                if (description.isBlank()) {
+                    //warning message
+                    System.out.println(ColorCodes.YELLOW + "Description cannot be empty." + ColorCodes.RESET);
+                }
+            }
+
+            // Get non-blank vendor from user
+            while (vendor.isBlank()) {
+                System.out.print("Enter the vendor: ");
+                vendor = scanner.nextLine().trim();
+                if (vendor.isBlank()) {
+                    // warning message
+                    System.out.println(ColorCodes.YELLOW + "Vendor name cannot be blank." + ColorCodes.YELLOW);
+                }
+            }
+
+            if (type.equals("payment") && amount > 0) {
+                amount = -amount; // negate the value of payment amount
+            }
+
+            fileWriter.write(LocalDate.now() + "|"
+                    + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                    + "|" + description + "|" + vendor + "|" + amount + "\n"); // write to file
+
+            accountingLedgerRecord.put(id, new AccountingLedger(id, LocalDateTime.now(), description, vendor, amount));
+
+            // success message in blue
+            System.out.println(type.equals("deposit") ? ColorCodes.PURPLE + "Deposit made" + ColorCodes.RESET :
+                    ColorCodes.PURPLE + "Payment made" + ColorCodes.RESET);
+
+
+        } catch (InputMismatchException e) {
+            // error message in red
+            System.out.println(ColorCodes.RED + "Please enter a numeric value." + ColorCodes.RESET);
+            homeScreen();
+        } catch (IOException ex) {
+            //error message in red
+            System.out.println(ColorCodes.RED + "File Not Found!" + ColorCodes.RESET);
+            homeScreen(); //navigate to home screen
+        } finally {
+            try {
+                fileWriter.flush();
+                fileWriter.close();
+
+                homeScreen(); // navigate to home screen
+            } catch (Exception e) {
+                // error message in red
+                System.out.println(ColorCodes.RED + "Something went wrong!" + ColorCodes.RESET);
+                homeScreen(); // navigate to home screen
+            }
+        }
+    }
+
+
+    private void displayEntries(String entryType) {
+        // create a HashMap to store the titles of the different entry types
+        HashMap<String, String> titleHeader = new HashMap<String, String>() {{
+            put("A", "All Entries");
+            put("D", "Deposit Entries");
+            put("P", "Payment Entries");
+        }};
+        String entryTable = "";
+
+        // print a blank line and the title of the entry type
+        System.out.println();
+        System.out.println(titleHeader.get(entryType));
+
+        // Use a StringBuilder to accumulate the entries to display
+        StringBuilder entries = new StringBuilder();
+
+        // Loop through all entries in the accounting ledger
+        for (AccountingLedger accountingLedger : accountingLedgerRecord.values()) {
+
+            // Only include entries that match the requested entry type
+            if ((entryType.equals("P") && accountingLedger.getAmount() < 0)
+                    || (entryType.equals("D") && accountingLedger.getAmount() >= 0)
+                    || (entryType.equals("A"))) {
+
+                entries.append(accountingLedger.displayAsString());
+            }
+        }
+
+        // If there are entries to display, concatenate the table header and entries into a single string
+        if (entries.length() > 0)
+            entryTable = tableHeader() + entries.toString();
+
+        // Print the table header and entries
+        System.out.println(entryTable);
+
+        // Prompt the user to press any key to return to the ledger screen
+        System.out.print("\nPress any key to go to the ledger screen: ");
+        scanner.nextLine();
+
+        ledgerScreen();// Return to the ledger screen
+    }
+
 
     private void makeReport(String reportType) {
         // Get the current year and months, and the previous year and month.
@@ -422,7 +421,7 @@ public class AccountingLedgerApp {
         }
 
         if (!reportBuilder.toString().isBlank())
-            reportBuilder.insert(0,displayTableHeader());// Append table header to the report builder.
+            reportBuilder.insert(0, tableHeader());// Append table header to the report builder.
 
         String report = reportBuilder.toString();
         // Display the report or display 'Report Unavailable'.
@@ -480,7 +479,7 @@ public class AccountingLedgerApp {
         }
 
         System.out.println("\nCUSTOM REPORT");
-        displayTableHeader();
+        tableHeader();
 
         // Loop through accountingLedgerRecord and filter results based on search values
         for (AccountingLedger accountingLedger : accountingLedgerRecord.values()) {
@@ -514,7 +513,7 @@ public class AccountingLedgerApp {
         }
 
         if(!(customReportBuilder.toString().isBlank())) // condition check if the is not blank
-            customReportBuilder.insert(0,displayTableHeader()); // insert table header at index 0
+            customReportBuilder.insert(0, tableHeader()); // insert table header at index 0
 
         String customReport = customReportBuilder.toString(); // store custom report
 
