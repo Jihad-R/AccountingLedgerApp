@@ -242,7 +242,7 @@ public class AccountingLedgerApp {
 
     // Make transaction (deposit/payment)
     private void makeTransaction(String transactionType) {
-        System.out.println(("\nMake " + transactionType + ": ").toUpperCase());
+        System.out.println(("\nMake " + transactionType).toUpperCase());
         try {
             // Prompt the user to enter the amount for the specified transaction type
             System.out.printf("Please enter the %s amount: ", transactionType);
@@ -445,9 +445,11 @@ public class AccountingLedgerApp {
 
     }
 
-    
+
     //Perform custom search
     private void customSearch() {
+
+        String amount;
 
         // Create a StringBuilder to store the report.
         StringBuilder customReportBuilder = new StringBuilder();
@@ -467,17 +469,8 @@ public class AccountingLedgerApp {
         System.out.print("Vendor (leave blank to skip): ");
         String vendor = scanner.nextLine().trim();
 
-        String amount = "";
-
-        try {
-            System.out.print("Amount (leave blank to skip): ");
-            amount = scanner.nextLine().trim();
-            Double.parseDouble(amount);
-        } catch (NumberFormatException e) {
-            //error message
-            System.out.println(ColorCodes.RED + "Invalid amount! Please try again." + ColorCodes.RESET);
-            customSearch();
-        }
+        System.out.print("Amount (leave blank to skip): ");
+        amount = scanner.nextLine().trim();
 
         // Convert string start and end date values to LocalDate objects if not empty
         LocalDate startDate = null;

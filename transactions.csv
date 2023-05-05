@@ -1,13 +1,6 @@
 date|time|description|vendor|amount
-2023-04-15|10:13:25|ergonomic keyboard|Amazon|-89.50
-2023-04-15|11:15:45|Invoice 1001 paid|Joe|1500.00
-2023-01-01|09:15:15|Office supplies|Staples|-25.55
-2023-02-05|14:30:10|Website hosting|GoDaddy|-9.99
 2020-03-10|12:00:43|Monthly rent payment|Landlord|-1500.00
-2022-04-15|11:45:15|Marketing materials|VistaPrint|-200.00
-2022-05-20|10:00:32|Consulting fee|ABC Consulting|1200.00
 2020-06-30|15:20:26|Travel expenses|Expedia|-500.00
-2022-07-05|08:45:30|Office rent payment|Regus|-750.00
 2020-08-10|13:00:50|Website design|XYZ Agency|-1500.00
 2020-09-20|10:30:10|Employee salaries|Payroll company|-5000.00
 2020-10-01|09:00:00|Office supplies|Amazon|-50.00
@@ -16,7 +9,15 @@ date|time|description|vendor|amount
 2021-01-15|11:45:11|Marketing materials|VistaPrint|-200.00
 2021-02-20|10:00:32|Consulting fee|ABC Consulting|1200.00
 2021-03-30|15:20:25|Travel expenses|Expedia|-500.00
+2022-04-15|11:45:15|Marketing materials|VistaPrint|-200.00
+2022-05-20|10:00:32|Consulting fee|ABC Consulting|1200.00
+2022-07-05|08:45:30|Office rent payment|Regus|-750.00
+2023-01-01|09:15:15|Office supplies|Staples|-25.55
+2023-04-15|10:13:25|ergonomic keyboard|Amazon|-89.50
+2023-04-15|11:15:45|Invoice 1001 paid|Joe|1500.00
 2023-05-03|10:44:39|Consulting Fee|ABC Consulting|1200.0
 2023-05-03|12:27:40|Invoice 1001 paid|Joe|1500.0
 2023-05-04|10:59:42|Consulting fee|ABC Consulting|1200.0
 2023-05-04|14:50:01|XYZ services|XYZ agency|100.0
+2023-05-05|09:32:51|Consulting fee|ABC Consulting|1200.0
+2023-05-05|09:33:37|Website hosting|Godaddy|-9.99
